@@ -1,0 +1,9 @@
+# npm
+node_modules
+package-lock.json
+.env
+.dockerignore
+Dockerfile
+api.http
+test.js
+src/logs

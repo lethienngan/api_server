@@ -1,0 +1,60 @@
+require("dotenv").config();
+const express = require("express");
+const app = express();
+const helmet = require("helmet");
+const morgan = require("morgan");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+// Import config
+const { mongoose, connectMongoDb } = require("./src/configs/mongodb.config");
+const { connectRedis } = require("./src/configs/redis.config");
+
+const {
+    ErrorHandler,
+    invalidPathHandler,
+} = require("./src/middlewares/ErrorHandler.middleware");
+const { route: userRouter } = require("./src/routes/User.route");
+const { route: driveRouter } = require("./src/routes/GoogleApi.route");
+const { route: sqlRouter } = require("./src/routes/postgres.route");
+
+const PORT = process.env.PORT || 3333;
+
+// Express middleware - plugin
+app.use(
+    cors({
+        origin: ["http://localhost:5173", "http://localhost:5174"],
+        credentials: true,
+    })
+);
+app.use(helmet());
+app.use(morgan("dev"));
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Router
+app.use("/v1/user", userRouter);
+app.use("/v1/drive", driveRouter);
+app.use("/v1/db", sqlRouter);
+
+// Error Handling
+app.use(invalidPathHandler());
+app.use(ErrorHandler());
+
+// Start app
+(async () => {
+    try {
+        await connectRedis().catch((err) => {
+            throw new Error(err);
+        });
+        await connectMongoDb(process.env.MONGO_URI).catch((err) => {
+            throw new Error(err);
+        });
+
+        // finally, START SERVER
+        app.listen(PORT);
+        console.log(`Server is running at port: ${PORT}`);
+    } catch (err) {
+        console.error("Server Error:::", err);
+    }
+})();
