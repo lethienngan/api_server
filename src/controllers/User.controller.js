@@ -4,13 +4,13 @@ const {
     userLoginValidate,
 } = require("../middlewares/userController.middleware");
 const userModel = require("../models/Users.model");
-const { hashPwd, comparePwd } = require("../services/pwdHandler");
+const { hashPwd, comparePwd } = require("../services/pwdHandler.service");
 const { asyncWrapper } = require("../utils/asyncWrapper");
 const {
     signAccessToken,
     signRefreshToken,
     verifyRefreshToken,
-} = require("../services/jwt_service");
+} = require("../services/jwt.service");
 const { client } = require("../configs/redis.config");
 
 const userRegister = async (req, res, next) => {

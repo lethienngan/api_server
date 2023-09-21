@@ -1,7 +1,7 @@
 const createError = require("http-errors");
 const joi = require("joi");
 const { asyncWrapper } = require("../utils/asyncWrapper");
-const { verifyAccessToken } = require("../services/jwt_service");
+const { verifyAccessToken } = require("../services/jwt.service");
 
 const userRegisterValidate = (data) => {
 	const userRegisterSchema = joi.object({
