@@ -5,7 +5,7 @@ const {
 } = require("../middlewares/userController.middleware");
 const userModel = require("../models/Users.model");
 const { hashPwd, comparePwd } = require("../services/pwdHandler.service");
-const { asyncWrapper } = require("../utils/asyncWrapper");
+const { asyncWrapper } = require("../utils/asyncHandler");
 const {
     signAccessToken,
     signRefreshToken,

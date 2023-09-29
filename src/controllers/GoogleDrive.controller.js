@@ -2,8 +2,11 @@ const createError = require("http-errors");
 const fs = require("fs");
 const path = require("path");
 const { driveService } = require("../configs/google.config");
-const { createFile, ggDriveDownloadFile } = require("../services/ggDrive.service");
-const { asyncWrapper } = require("../utils/asyncWrapper");
+const {
+    createFile,
+    ggDriveDownloadFile,
+} = require("../services/ggDrive.service");
+const { asyncWrapper } = require("../utils/asyncHandler");
 
 // Test folder id (parent folder): 1B0uxNwOp54TlLy_gCVuG7YBVDO3zC6x1
 const parent = "1B0uxNwOp54TlLy_gCVuG7YBVDO3zC6x1";

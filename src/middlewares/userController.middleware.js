@@ -1,6 +1,6 @@
 const createError = require("http-errors");
 const joi = require("joi");
-const { asyncWrapper } = require("../utils/asyncWrapper");
+const { asyncWrapper } = require("../utils/asyncHandler");
 const { verifyAccessToken } = require("../services/jwt.service");
 
 const userRegisterValidate = (data) => {

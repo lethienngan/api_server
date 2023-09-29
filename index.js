@@ -16,6 +16,7 @@ const {
 const { route: userRouter } = require("./src/routes/User.route");
 const { route: driveRouter } = require("./src/routes/GoogleApi.route");
 const { route: sqlRouter } = require("./src/routes/postgres.route");
+const { route: testingRouter } = require("./src/routes/testing.route");
 
 const PORT = process.env.PORT || 3333;
 
@@ -36,6 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/v1/user", userRouter);
 app.use("/v1/drive", driveRouter);
 app.use("/v1/db", sqlRouter);
+app.use("/v1/testing", testingRouter);
 
 // Error Handling
 app.use(invalidPathHandler());
@@ -54,6 +56,10 @@ app.use(ErrorHandler());
         // finally, START SERVER
         app.listen(PORT);
         console.log(`Server is running at port: ${PORT}`);
+
+        // cronjobs invoke here
+        if (process.env.CRON_JOBS === "true")
+            require("./src/services/schedule.service");
     } catch (err) {
         console.error("Server Error:::", err);
     }
