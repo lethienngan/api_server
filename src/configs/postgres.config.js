@@ -15,8 +15,8 @@ pg.on("error", (err, client) => {
     process.exit(-1);
 });
 
-pg.connect()
-    .then(() => console.log("PG is connected"))
-    .catch((err) => console.log("PG connection error: ", err));
+// pg.connect()
+//     .then(() => console.log("PG is connected"))
+//     .catch((err) => console.log("PG connection error: ", err));
 
 module.exports = { pg };

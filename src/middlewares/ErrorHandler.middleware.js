@@ -10,11 +10,7 @@ const invalidPathHandler = () => {
 const ErrorHandler = () => {
     return (err, req, res, next) => {
         console.log(err.message);
-        logEvents(
-            `logId: ${uuid()} --- ${req.url} --- ${req.method} --- ${
-                err.message
-            }`
-        );
+        logEvents(`logId: ${uuid()} --- ${req.url} --- ${req.method} --- ${err.message}`);
         res.status(err.status || 500).json({
             from: "ErrorHandler",
             status: err.status || 500,

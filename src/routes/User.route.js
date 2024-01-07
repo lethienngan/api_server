@@ -15,9 +15,7 @@ const { verifyUserToken } = require("../middlewares/userController.middleware");
 route.post("/", async (req, res, next) => {
     console.log(req.body);
     try {
-        const [data, error] = await asyncFetchWrapper(
-            "https://jsonplaceholder.typicode.com/posts"
-        );
+        const [data, error] = await asyncFetchWrapper("https://jsonplaceholder.typicode.com/posts");
         if (error) {
             throw createError.InternalServerError();
         }
@@ -37,15 +35,16 @@ route.post("/login", userLogin);
 route.get("/refresh-token", userRefreshToken);
 
 // Logout
-route.get("/logout", userLogout);
+route.delete("/logout", userLogout);
+
+// Compare password
+route.post("/compare", userComparePwd);
 
 //
 route.get("/getList", verifyUserToken, async (req, res, next) => {
     try {
         // if verify AccessToken is success
-        const [data, error] = await asyncFetchWrapper(
-            "https://jsonplaceholder.typicode.com/users"
-        );
+        const [data, error] = await asyncFetchWrapper("https://jsonplaceholder.typicode.com/users");
         if (error) {
             throw createError.InternalServerError();
         }
@@ -54,8 +53,5 @@ route.get("/getList", verifyUserToken, async (req, res, next) => {
         next(error);
     }
 });
-
-// Compare password
-route.post("/compare", userComparePwd);
 
 module.exports = { route };

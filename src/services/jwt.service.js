@@ -6,15 +6,10 @@ const signAccessToken = (userId) => {
         const options = {
             expiresIn: "60s",
         };
-        jwt.sign(
-            { userId },
-            process.env.ACCESS_TOKEN_SECRET,
-            options,
-            (err, token) => {
-                if (err) reject(err);
-                resolve(token);
-            }
-        );
+        jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, options, (err, token) => {
+            if (err) reject(err);
+            resolve(token);
+        });
     });
 };
 
@@ -23,16 +18,10 @@ const signRefreshToken = (userId) => {
         const options = {
             expiresIn: "1h",
         };
-
-        jwt.sign(
-            { userId },
-            process.env.REFRESH_TOKEN_SECRET,
-            options,
-            (err, token) => {
-                if (err) reject(err);
-                resolve(token);
-            }
-        );
+        jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, options, (err, token) => {
+            if (err) reject(err);
+            resolve(token);
+        });
     });
 };
 

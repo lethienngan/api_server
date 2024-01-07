@@ -1,17 +1,10 @@
 const createError = require("http-errors");
-const {
-    userRegisterValidate,
-    userLoginValidate,
-} = require("../middlewares/userController.middleware");
+const { userRegisterValidate, userLoginValidate } = require("../middlewares/userController.middleware");
 const userModel = require("../models/Users.model");
 const { hashPwd, comparePwd } = require("../services/pwdHandler.service");
 const { asyncWrapper } = require("../utils/asyncHandler");
-const {
-    signAccessToken,
-    signRefreshToken,
-    verifyRefreshToken,
-} = require("../services/jwt.service");
-const { client } = require("../configs/redis.config");
+const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../services/jwt.service");
+const { redisClient } = require("../configs/redis.config");
 
 const userRegister = async (req, res, next) => {
     try {
@@ -29,17 +22,9 @@ const userRegister = async (req, res, next) => {
         });
         if (isExist) {
             if (isExist?.username === username) {
-                return next(
-                    createError.Conflict(
-                        `Username: "${username}" is already registered`
-                    )
-                );
+                return next(createError.Conflict(`Username: "${username}" is already registered`));
             } else if (isExist?.email === email) {
-                return next(
-                    createError.Conflict(
-                        `Email: "${email}" is already registered`
-                    )
-                );
+                return next(createError.Conflict(`Email: "${email}" is already registered`));
             }
         }
 
@@ -89,19 +74,15 @@ const userLogin = async (req, res, next) => {
         }
 
         // Assign access & refresh Token
-        const [accessToken, errAccessToken] = await asyncWrapper(
-            signAccessToken(user.id)
-        );
-        const [refreshToken, errRefreshToken] = await asyncWrapper(
-            signRefreshToken(user.id)
-        );
+        const [accessToken, errAccessToken] = await asyncWrapper(signAccessToken(user.id));
+        const [refreshToken, errRefreshToken] = await asyncWrapper(signRefreshToken(user.id));
         if (errAccessToken || errRefreshToken) {
             next(createError.InternalServerError(`Cannot create user's Token`));
             throw new Error(errAccessToken || errRefreshToken);
         }
 
         // Set redis user refesh token
-        await client.set(user.id, refreshToken, {
+        await redisClient.set(user.id, refreshToken, {
             EX: 60 * 60 * 24,
         });
         // Set Cookies
@@ -133,20 +114,16 @@ const userLogout = async (req, res, next) => {
         }
 
         // Verify refresh Token
-        const [payload, verifyErr] = await asyncWrapper(
-            verifyRefreshToken(refreshToken)
-        );
+        const [payload, verifyErr] = await asyncWrapper(verifyRefreshToken(refreshToken));
         if (verifyErr) {
             next(createError.InternalServerError(verifyErr.message));
             throw new Error(verifyErr);
         }
 
         // Delete user's redis_token
-        const isDeleted = await client.del(payload?.userId);
+        const isDeleted = await redisClient.del(payload?.userId);
         if (isDeleted === 0) {
-            throw createError.InternalServerError(
-                `Delete user's redis_token: FAILED`
-            );
+            throw createError.InternalServerError(`Delete user's redis_token: FAILED`);
         }
         // clear browser cookies
         res.clearCookie("refreshToken");
@@ -162,59 +139,42 @@ const userRefreshToken = async (req, res, next) => {
     console.log(req.cookies);
     try {
         const { refreshToken } = req.cookies;
-        if (!refreshToken)
-            throw createError.BadRequest("Refresh Token not found");
+        if (!refreshToken) throw createError.BadRequest("Refresh Token not found");
 
         // Verify refresh Token
-        const [payload, verifyErr] = await asyncWrapper(
-            verifyRefreshToken(refreshToken)
-        );
+        const [payload, verifyErr] = await asyncWrapper(verifyRefreshToken(refreshToken));
         if (verifyErr) {
             next(createError.InternalServerError(verifyErr.message));
             throw new Error(verifyErr);
         }
 
         // Compare to redis_token
-        const redisToken = await client.get(payload?.userId);
+        const redisToken = await redisClient.get(payload?.userId);
 
         if (redisToken === null) {
             next(createError.InternalServerError("redis token not found"));
             throw new Error("redis token not found");
         }
         if (refreshToken !== redisToken) {
-            next(
-                createError.Unauthorized(`user's refresh token does not match`)
-            );
+            next(createError.Unauthorized(`user's refresh token does not match`));
             throw new Error(`user refresh token does not match`);
         }
 
         // Assign new access & refresh Token
-        const [newAccessToken, accessError] = await asyncWrapper(
-            signAccessToken(payload?.userId)
-        );
-        const [newRefreshToken, refreshError] = await asyncWrapper(
-            signRefreshToken(payload?.userId)
-        );
+        const [newAccessToken, accessError] = await asyncWrapper(signAccessToken(payload?.userId));
+        const [newRefreshToken, refreshError] = await asyncWrapper(signRefreshToken(payload?.userId));
         if (accessError || refreshError) {
-            next(
-                createError.InternalServerError(
-                    `Cannot assign new token for user`
-                )
-            );
+            next(createError.InternalServerError(`Cannot assign new token for user`));
             throw new Error(accessError || refreshError);
         }
 
         // Redis set user's newRefreshToken
-        const result = await client.set(payload?.userId, newRefreshToken, {
+        const result = await redisClient.set(payload?.userId, newRefreshToken, {
             EX: 60 * 60 * 24,
         });
 
         if (result !== "OK") {
-            next(
-                createError.InternalServerError(
-                    `Cannot set redis refresh token`
-                )
-            );
+            next(createError.InternalServerError(`Cannot set redis refresh token`));
             throw new Error(redisSetError);
         }
         // Set Cookies
@@ -224,9 +184,7 @@ const userRefreshToken = async (req, res, next) => {
             path: "/",
             sameSite: "strict",
         });
-        return res
-            .status(200)
-            .json({ newAccessToken, newRefreshToken: "stored in browser" });
+        return res.status(200).json({ newAccessToken, newRefreshToken: "stored in browser" });
     } catch (error) {
         // next(error);
     }

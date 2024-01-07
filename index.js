@@ -9,10 +9,7 @@ const cookieParser = require("cookie-parser");
 const { mongoose, connectMongoDb } = require("./src/configs/mongodb.config");
 const { connectRedis } = require("./src/configs/redis.config");
 
-const {
-    ErrorHandler,
-    invalidPathHandler,
-} = require("./src/middlewares/ErrorHandler.middleware");
+const { ErrorHandler, invalidPathHandler } = require("./src/middlewares/ErrorHandler.middleware");
 const { route: userRouter } = require("./src/routes/User.route");
 const { route: driveRouter } = require("./src/routes/GoogleApi.route");
 const { route: sqlRouter } = require("./src/routes/postgres.route");
@@ -46,9 +43,6 @@ app.use(ErrorHandler());
 // Start app
 (async () => {
     try {
-        await connectRedis().catch((err) => {
-            throw new Error(err);
-        });
         await connectMongoDb(process.env.MONGO_URI).catch((err) => {
             throw new Error(err);
         });
@@ -58,8 +52,7 @@ app.use(ErrorHandler());
         console.log(`Server is running at port: ${PORT}`);
 
         // cronjobs invoke here
-        if (process.env.CRON_JOBS === "true")
-            require("./src/services/schedule.service");
+        if (process.env.CRON_JOBS === "true") require("./src/services/schedule.service");
     } catch (err) {
         console.error("Server Error:::", err);
     }
