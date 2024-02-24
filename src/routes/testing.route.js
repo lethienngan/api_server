@@ -3,9 +3,9 @@ const { redisClient } = require("../configs/redis.config");
 const { commonRateLimit } = require("../middlewares/RateLimit.middleware");
 const route = require("express").Router();
 
-router.get("/getList", (req, res, next) => {
+route.get("/getList", (req, res, next) => {
     try {
-        // const sampleData = 
+        // const sampleData =
         return res.status(200).json();
     } catch (error) {
         console.log(error);
@@ -19,8 +19,18 @@ route.post("/rateLimit", commonRateLimit, (req, res, next) => {
     }
 });
 route.post("/setRedis", async (req, res, next) => {
-    redisClient.set(Date.now().toString(), Date.now());
-    res.status(200).send("OK");
+    try {
+        const setResult = await redisClient.set("myKey1", Date.now(), {
+            NX: true,
+        });
+        if(!setResult) {
+           return next(createHttpError[400](result))
+        }
+        
+        res.status(200).send("OK");
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 // Test websocket server

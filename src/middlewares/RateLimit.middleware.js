@@ -10,7 +10,7 @@ const commonRateLimit = async (req, res, next) => {
             const requestInfo = `user|${ip}|${req.originalUrl}`;
             const curTimeStamp = Date.now();
             const prevTimeStamp = await redisClient.get(requestInfo);
-
+            console.log(requestInfo)
             // if IP address does not exist -> create new one & store in Redis -> PASSED
             if (prevTimeStamp === null) {
                 await redisClient.set(requestInfo.toString(), curTimeStamp, {
