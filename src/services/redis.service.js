@@ -8,4 +8,13 @@ const redis_setRefreshToken = async (userId, token, option) => {
     }
 };
 
-module.exports = { redis_setRefreshToken };
+const setnx = async (key, value) => {
+    try {
+        await redisClient.set(key, value, {
+            NX: true,
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
+module.exports = { redis_setRefreshToken, setnx };

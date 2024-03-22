@@ -136,7 +136,6 @@ const userLogout = async (req, res, next) => {
     }
 };
 const userRefreshToken = async (req, res, next) => {
-    console.log(req.cookies);
     try {
         const { refreshToken } = req.cookies;
         if (!refreshToken) throw createError.BadRequest("Refresh Token not found");
@@ -144,13 +143,11 @@ const userRefreshToken = async (req, res, next) => {
         // Verify refresh Token
         const [payload, verifyErr] = await asyncWrapper(verifyRefreshToken(refreshToken));
         if (verifyErr) {
-            next(createError.InternalServerError(verifyErr.message));
-            throw new Error(verifyErr);
+            return next(createError.InternalServerError(verifyErr.message));
         }
 
-        // Compare to redis_token
+        // Compare request_refresh_token to redis_refresh_token
         const redisToken = await redisClient.get(payload?.userId);
-
         if (redisToken === null) {
             next(createError.InternalServerError("redis token not found"));
             throw new Error("redis token not found");
@@ -186,7 +183,7 @@ const userRefreshToken = async (req, res, next) => {
         });
         return res.status(200).json({ newAccessToken, newRefreshToken: "stored in browser" });
     } catch (error) {
-        // next(error);
+        console.log("DEV_NGAN catch: ", error);
     }
 };
 const userComparePwd = async (req, res, next) => {

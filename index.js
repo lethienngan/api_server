@@ -15,6 +15,7 @@ const { route: sqlRouter } = require("./src/routes/postgres.route");
 const { route: testingRouter } = require("./src/routes/testing.route");
 const { route: kafkaProducer } = require("./src/routes/Kafka.route");
 const { route: sseRouter } = require("./src/routes/SSE.route");
+const { route: orderRoute} = require("./src/routes/order.route")
 
 const PORT = process.env.PORT || 3333;
 
@@ -38,6 +39,7 @@ app.use("/v1/db", sqlRouter);
 app.use("/v1/testing", testingRouter);
 app.use("/v1/kafka", kafkaProducer);
 app.use("/v1/sse", sseRouter);
+app.use("/v1/order", orderRoute);
 
 // Error Handling
 app.use(invalidPathHandler());
