@@ -2,13 +2,14 @@
     "name": "api_server",
     "version": "1.0.0",
     "description": "",
+    "type": "commonjs",
     "main": "index.js",
     "scripts": {
         "dev": "nodemon ./index.js",
         "start": "nodemon ./index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "author": "",
+    "author": "Le Thien Ngan (Rich Le)",
     "license": "ISC",
     "dependencies": {
         "bcrypt": "^5.1.0",

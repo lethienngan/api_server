@@ -7,7 +7,7 @@ const commonRateLimit = async (req, res, next) => {
     {
         try {
             const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-            const requestInfo = `user|${ip}|${req.originalUrl}`;
+            const requestInfo = `user|ipAddress${ip}|originalUrl::${req.originalUrl}`;
             const curTimeStamp = Date.now();
             const prevTimeStamp = await redisClient.get(requestInfo);
             console.log(requestInfo)
@@ -21,7 +21,7 @@ const commonRateLimit = async (req, res, next) => {
 
             // compare timestamp between previous req with current req
             if (parseInt(curTimeStamp) - parseInt(prevTimeStamp) < 200) {
-                return res.status(400).json({ status: 400, msg: "Server too busy" });
+                return res.status(400).json({ status: 400, msg: "Server too busy, client requests too much" });
             }
 
             // If PASS, set new timestamp for user's ip on redis

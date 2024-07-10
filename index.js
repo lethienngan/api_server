@@ -1,4 +1,4 @@
-require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const app = express();
 const helmet = require("helmet");
@@ -15,9 +15,14 @@ const { route: sqlRouter } = require("./src/routes/postgres.route");
 const { route: testingRouter } = require("./src/routes/testing.route");
 const { route: kafkaProducer } = require("./src/routes/Kafka.route");
 const { route: sseRouter } = require("./src/routes/SSE.route");
-const { route: orderRoute} = require("./src/routes/order.route")
+const { route: orderRoute } = require("./src/routes/order.route");
 
-const PORT = process.env.PORT || 3333;
+// Set up ENV
+require("dotenv").config({
+    path: path.join(__dirname, ""),
+});
+
+const PORT = process.env.PORT;
 
 // Express middleware - plugin
 app.use(
@@ -54,7 +59,7 @@ app.use(ErrorHandler());
 
         // finally, START SERVER
         app.listen(PORT, () => {
-            console.log(`Server is running at port: ${PORT}`);
+            console.log(`Server is running at port: ${PORT} | in mode: ${app.get("env")}`);
         });
 
         // cronjobs invoke here
