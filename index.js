@@ -1,70 +1,21 @@
-const path = require("path");
-const express = require("express");
-const app = express();
-const helmet = require("helmet");
-const morgan = require("morgan");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
+const cluster = require("cluster");
+const os = require("os");
+const cpuCount = os.cpus().length;
 
-// Import local modules
-const { connectMongoDb } = require("./src/configs/mongodb.config");
-const { ErrorHandler, invalidPathHandler } = require("./src/middlewares/ErrorHandler.middleware");
-const { route: userRouter } = require("./src/routes/User.route");
-const { route: driveRouter } = require("./src/routes/GoogleApi.route");
-const { route: sqlRouter } = require("./src/routes/postgres.route");
-const { route: testingRouter } = require("./src/routes/testing.route");
-const { route: kafkaProducer } = require("./src/routes/Kafka.route");
-const { route: sseRouter } = require("./src/routes/SSE.route");
-const { route: orderRoute } = require("./src/routes/order.route");
-
-// Set up ENV
-require("dotenv").config({
-    path: path.join(__dirname, ""),
+cluster.setupPrimary({
+    exec: __dirname + "/src/server.js",
 });
 
-const PORT = process.env.PORT;
+if (cluster.isPrimary) {
+    console.log("Number of CPUS: ", cpuCount);
+    console.log("Cluster Master: ", cluster.isPrimary);
+    os.cpus().forEach(() => {
+        cluster.fork();
+    });
+}
 
-// Express middleware - plugin
-app.use(
-    cors({
-        origin: ["http://localhost:5173", "http://localhost:5174"],
-        credentials: true,
-    })
-);
-app.use(helmet());
-app.use(morgan("dev"));
-app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Router
-app.use("/v1/user", userRouter);
-app.use("/v1/drive", driveRouter);
-app.use("/v1/db", sqlRouter);
-app.use("/v1/testing", testingRouter);
-app.use("/v1/kafka", kafkaProducer);
-app.use("/v1/sse", sseRouter);
-app.use("/v1/order", orderRoute);
-
-// Error Handling
-app.use(invalidPathHandler());
-app.use(ErrorHandler());
-
-// Start app
-(async () => {
-    try {
-        await connectMongoDb(process.env.MONGO_URI).catch((err) => {
-            throw new Error(err);
-        });
-
-        // finally, START SERVER
-        app.listen(PORT, () => {
-            console.log(`Server is running at port: ${PORT} | in mode: ${app.get("env")}`);
-        });
-
-        // cronjobs invoke here
-        // if (process.env.CRON_JOBS === "true") require("./src/services/schedule.service");
-    } catch (err) {
-        console.error("Server Error:::", err);
-    }
-})();
+cluster.on("exit", (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} has been killed`);
+    console.log(`Starting another worker`);
+    cluster.default.fork();
+});
