@@ -1,10 +1,10 @@
 const createError = require("http-errors");
-const { userRegisterValidate, userLoginValidate } = require("../middlewares/userController.middleware");
-const userModel = require("../models/Users.model");
-const { hashPwd, comparePwd } = require("../services/pwdHandler.service");
-const { asyncWrapper } = require("../utils/asyncHandler");
-const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../services/jwt.service");
-const { redisClient } = require("../configs/redis.config");
+const { userRegisterValidate, userLoginValidate } = require("../../middlewares/userController.middleware");
+const { userModel } = require("../../Repository/mongoModel/Users.model");
+const { hashPwd, comparePwd } = require("../../services/pwdHandler.service");
+const { asyncWrapper } = require("../../utils/asyncHandler");
+const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../../services/jwt.service");
+const { redisClient } = require("../../configs/redis.config");
 
 const userRegister = async (req, res, next) => {
     try {

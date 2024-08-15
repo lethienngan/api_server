@@ -1,4 +1,6 @@
+const { poolClassicModels } = require("../configs/mysql.config");
 const { pg } = require("../configs/postgres.config");
+
 const createError = require("http-errors");
 const injection = async (req, res, next) => {
     try {
@@ -15,12 +17,24 @@ const injection = async (req, res, next) => {
             })
             .then((res) => res.rows[0]);
 
-        return result
-            ? res.status(200).json(result)
-            : next(createError.NotFound(`User ${username} not found`));
+        return result ? res.status(200).json(result) : next(createError.NotFound(`User ${username} not found`));
     } catch (error) {
         next(createError.InternalServerError(error));
     }
 };
 
-module.exports = { injection };
+const getData = async (req, res, next) => {
+    try {
+        const [result, field] = await poolClassicModels.execute("SELECT * FROM customers").catch((err) => {
+            throw err;
+        });
+        return res.status(200).json({
+            msg: "OK",
+            dataLenght: result.length,
+            data: result,
+        });
+    } catch (error) {
+        next(createError.InternalServerError(error));
+    }
+};
+module.exports = { injection, getData };

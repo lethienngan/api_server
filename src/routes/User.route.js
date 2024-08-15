@@ -7,7 +7,7 @@ const {
     userLogin,
     userRefreshToken,
     userLogout,
-} = require("../controllers/User.controller");
+} = require("../controllers/user/User.controller");
 const { asyncFetchWrapper } = require("../utils/asyncHandler");
 const { verifyUserToken } = require("../middlewares/userController.middleware");
 

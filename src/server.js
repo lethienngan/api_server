@@ -1,18 +1,24 @@
 require("dotenv").config();
+const path = require("path");
+const os = require("os");
 const { app } = require("./app.js");
-const { connectMongoDb } = require("./configs/mongodb.config.js");
+
+// Set up ENV
+require("dotenv").config({
+    path: path.join(__dirname, ""),
+});
 
 const runServer = async (PORT, expressApp) => {
     try {
+        process.env.UV_THREADPOOL_SIZE = 4
         // Connect to DB
-        await connectMongoDb(process.env.MONGO_URI).catch((err) => {
-            throw new Error(err);
-        });
+        require("./configs/mongodb.config.js");
 
         // finally, START SERVER
         const server = expressApp.listen(PORT || 3333, () => {
-            console.log(`Server is running at port: ${PORT} | mode: ${app.get("env")}`);
-            console.log("Worker PID: ", process.pid);
+            console.log(`Server is running at port: ${PORT} | mode: ${expressApp.get("env")}`);
+            console.log("NodeJS worker PID: ", process.pid);
+            console.log("NodeJS ThreadPool size:", process.env.UV_THREADPOOL_SIZE);
         });
 
         // cronjobs invoke here

@@ -1,12 +1,13 @@
 const createHttpError = require("http-errors");
 const { redisClient } = require("../configs/redis.config");
 const { commonRateLimit } = require("../middlewares/RateLimit.middleware");
+const { sleep } = require("../utils/asyncHandler");
 const route = require("express").Router();
 
-route.get("/getList", (req, res, next) => {
+route.get("/getList", async (req, res, next) => {
     try {
-        // const sampleData =
-        return res.status(200).json();
+        // await sleep(3000)
+        return res.status(200).json("ok");
     } catch (error) {
         console.log(error);
     }
