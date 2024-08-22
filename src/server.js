@@ -21,7 +21,7 @@ const runServer = async (PORT, expressApp) => {
             console.log("NodeJS ThreadPool size:", process.env.UV_THREADPOOL_SIZE);
         });
 
-        // cronjobs invoke here
+        // invoke cronjob here
         // if (process.env.CRON_JOBS === "true") require("./src/services/schedule.service");
     } catch (err) {
         console.error("Server Error:::", err);
